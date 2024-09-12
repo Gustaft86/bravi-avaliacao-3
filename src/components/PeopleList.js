@@ -1,8 +1,7 @@
-// src/components/PeopleList.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPeople, addPerson, removePerson, setStatus, setError } from '../redux/peopleSlice';
-import { fetchPeople, createPerson, deletePerson } from '../api';
+import { fetchPeopleThunk, createPersonThunk, deletePersonThunk } from '../redux/PeopleSlice';
+import { Link } from 'react-router-dom';
 import styles from './PeopleList.module.scss';
 
 const PeopleList = () => {
@@ -14,46 +13,22 @@ const PeopleList = () => {
     const [persons, setPersons] = useState([{ name: '', age: '' }]);
 
     useEffect(() => {
-        const loadPeople = async () => {
-            try {
-                dispatch(setStatus('loading'));
-                const data = await fetchPeople();
-                dispatch(setPeople(data));
-                dispatch(setStatus('succeeded'));
-            } catch (err) {
-                dispatch(setError(err.toString()));
-                dispatch(setStatus('failed'));
-            }
-        };
-
-        loadPeople();
+        dispatch(fetchPeopleThunk());
     }, [dispatch]);
 
-    const handleAddPerson = async () => {
+    const handleAddPerson = () => {
         if (persons.every((person) => person.name && person.age)) {
-            try {
-                const newPersons = persons.map(person => ({ name: person.name, age: parseInt(person.age, 10) }));
-                const createdPerson = await createPerson(newPersons);
-                for (let newPerson of createdPerson) {
-                    dispatch(addPerson(newPerson));
-                }
-                setPersons([{ name: '', age: '' }]);
-            } catch (err) {
-                console.error('Failed to add person:', err);
-                dispatch(setError(err.toString()));
-            }
+            const newPersons = persons.map(person => ({ name: person.name, age: parseInt(person.age, 10) }));
+            dispatch(createPersonThunk(newPersons))
+                .then(() => setPersons([{ name: '', age: '' }]))
+                .catch(err => console.error('Failed to add person:', err));
         } else {
             alert('Please fill in all fields before adding.');
         }
     };
 
-    const handleDeletePerson = async (id) => {
-        try {
-            await deletePerson(id);
-            dispatch(removePerson(id));
-        } catch (err) {
-            dispatch(setError(err.toString()));
-        }
+    const handleDeletePerson = (id) => {
+        dispatch(deletePersonThunk(id)).catch(err => console.error('Failed to delete person:', err));
     };
 
     const handleAddFields = () => {
@@ -79,9 +54,9 @@ const PeopleList = () => {
             <ul className={styles.list}>
                 {people.map((person) => (
                     <li key={person._id}>
-                        <div className="personInfo">
+                        <Link to={`/details/${person._id}`} className={styles.personInfo}>
                             Name: {person.name} - {person.age} years old
-                        </div>
+                        </Link>
                         <button
                             onClick={() => handleDeletePerson(person._id)}
                             className={`${styles.deleteButton} ${styles.button}`}
