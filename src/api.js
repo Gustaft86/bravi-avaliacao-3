@@ -1,7 +1,8 @@
 export const fetchPeople = async () => {
     const response = await fetch('http://localhost:3001/api/persons');
     if (!response.ok) throw new Error('Network response was not ok');
-    return response.json();
+    const data = await response.json();
+    return data;
 };
 
 export const createPerson = async (person) => {
@@ -11,7 +12,8 @@ export const createPerson = async (person) => {
         body: JSON.stringify(person),
     });
     if (!response.ok) throw new Error('Network response was not ok');
-    return response.json();
+    const data = await response.json();
+    return data;
 };
 
 export const deletePerson = async (id) => {
