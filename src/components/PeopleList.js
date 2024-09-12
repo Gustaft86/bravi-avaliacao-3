@@ -54,7 +54,7 @@ const PeopleList = () => {
             <ul className={styles.list}>
                 {people.map((person) => (
                     <li key={person._id}>
-                        <Link to={`/details/${person._id}`} className={styles.personInfo}>
+                        <Link to={`/person/${person._id}`} className={styles.personInfo}>
                             Name: {person.name} - {person.age} years old
                         </Link>
                         <button
